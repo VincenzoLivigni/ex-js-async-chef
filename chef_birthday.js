@@ -14,6 +14,7 @@ Scrivi la funzione getChefBirthday(id), che deve:
 ✔️ - Gestire gli errori con try/catch
 */
 
+/*
 async function fetchJson(url) {
     const res = await fetch(url)
     const obj = await res.json()
@@ -31,5 +32,51 @@ async function getChefBirthday(id) {
 }
 
 getChefBirthday(3)
+    .then(dataDiNascita => console.log("Data di nascita dello chef", dataDiNascita))
+    .catch(err => console.log(err))
+*/
+
+/*
+Bonus
+Attualmente, se la prima richiesta non trova una ricetta, la seconda richiesta potrebbe comunque essere eseguita causando errori a cascata.
+
+Modifica getChefBirthday(id) per intercettare eventuali errori prima di fare la seconda richiesta.
+*/
+
+async function fetchJson(url) {
+    const res = await fetch(url)
+    const obj = await res.json()
+    return obj
+}
+
+async function getChefBirthday(id) {
+
+    let ricetta
+    try {
+        ricetta = await fetchJson(`https://dummyjson.com/recipes/${id}`)
+    } catch (err) {
+        throw new Error(`Impossibile recuperare la ricetta con id: ${id}`)
+    }
+
+    if (ricetta.message) {
+        throw new Error(ricetta.message)
+    }
+
+
+    let chef
+    try {
+        chef = await fetchJson(`https://dummyjson.com/users/${ricetta.userId}`)
+    } catch (err) {
+        throw new Error("Impossibile recuperare le informazioni dello chef")
+    }
+
+    if (chef.message) {
+        throw new Error(chef.message)
+    }
+
+    return chef.birthDate
+}
+
+getChefBirthday(6)
     .then(dataDiNascita => console.log("Data di nascita dello chef", dataDiNascita))
     .catch(err => console.log(err))
